@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ChessOnline.Client/ChessOnline.Client.csproj" />
+  <Project Path="ChessOnline.Engine/ChessOnline.Engine.csproj" />
+  <Project Path="ChessOnline.Server/ChessOnline.Server.csproj" />
+  <Project Path="ChessOnline.Shared/ChessOnline.Shared.csproj" />
+  <Project Path="ChessOnline.Tests/ChessOnline.Tests.csproj" />
+</Solution>
