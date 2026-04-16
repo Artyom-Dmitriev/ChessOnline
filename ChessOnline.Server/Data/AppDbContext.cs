@@ -16,7 +16,6 @@ namespace ChessOnline.Server.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Твоя часть — настройка связей и индексов
 
             modelBuilder.Entity<Game>()
             .HasOne(g => g.WhitePlayer)
@@ -30,7 +29,7 @@ namespace ChessOnline.Server.Data
                 .HasForeignKey(g => g.BlackPlayerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Game>() // У Winner навигационное свойство nullable — это учти в типе - как это учесть?
+            modelBuilder.Entity<Game>()
             .HasOne(g => g.Winner)
             .WithMany()
             .HasForeignKey(g => g.WinnerId)

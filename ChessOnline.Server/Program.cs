@@ -31,8 +31,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
-// TokenService — твоя следующая задача
+// TokenService
 builder.Services.AddScoped<TokenService>();
+
+// CleanupService
+builder.Services.AddHostedService<GuestCleanupService>();
 
 var app = builder.Build();
 

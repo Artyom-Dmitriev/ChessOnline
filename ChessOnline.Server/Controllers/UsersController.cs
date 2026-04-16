@@ -4,6 +4,8 @@ using ChessOnline.Server.Models;
 using ChessOnline.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ChessOnline.Server.Controllers
 {
@@ -20,6 +22,7 @@ namespace ChessOnline.Server.Controllers
             _tokenService = tokenService;
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
@@ -42,6 +45,7 @@ namespace ChessOnline.Server.Controllers
             return Ok(new { Token = token });
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
@@ -54,6 +58,56 @@ namespace ChessOnline.Server.Controllers
                 return Unauthorized("Неверный email или пароль.");
 
             string token = _tokenService.GenerateToken(user);
+            return Ok(new { Token = token });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("guest")]
+        public async Task<IActionResult> Guest()
+        {
+            string guestNickname = $"Guest_{Guid.NewGuid().ToString("N")[..8]}";
+            User guestUser = new User
+            {
+                Nickname = guestNickname,           
+                IsGuest = true,
+                GuestExpiresAt = DateTime.UtcNow.AddHours(24)
+            };
+            _context.Users.Add(guestUser);
+            await _context.SaveChangesAsync();
+            string token = _tokenService.GenerateToken(guestUser);
+            return Ok(new { Token = token });
+        }
+
+        [Authorize]
+        [HttpPost("upgrade")]
+        public async Task<IActionResult> Upgrade(RegisterRequest request)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            
+            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId); 
+
+            if (user == null)
+                return NotFound("Такого пользователя нет!");
+
+            if (user.IsGuest == false)
+                return BadRequest("Аккаунт уже является постоянным!");
+
+            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+                return BadRequest("Данный email уже используется.");
+
+            if (await _context.Users.AnyAsync(u => u.Nickname == request.Nickname))
+                return BadRequest("Данный nickname уже используется.");
+            
+                user.Nickname = request.Nickname;
+                user.Email = request.Email;
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                user.IsGuest = false;
+                user.GuestExpiresAt = null;           
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync(); 
+            string token = _tokenService.GenerateToken(user);
+
             return Ok(new { Token = token });
         }
     }
