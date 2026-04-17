@@ -49,10 +49,17 @@ namespace ChessOnline.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
+            
             User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user == null)
                 return Unauthorized("Неверный email или пароль.");
+
+
+            if (user.IsGuest == true)
+                return Unauthorized("Гостевые аккаунты не могут войти с помощью email и пароля." +
+                    " Пожалуйста, зарегистрируйтесь.");
+
 
             if (BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash) == false)
                 return Unauthorized("Неверный email или пароль.");
@@ -92,10 +99,10 @@ namespace ChessOnline.Server.Controllers
             if (user.IsGuest == false)
                 return BadRequest("Аккаунт уже является постоянным!");
 
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+            if (await _context.Users.AnyAsync(u => u.Email == request.Email && u.Id != userId))
                 return BadRequest("Данный email уже используется.");
 
-            if (await _context.Users.AnyAsync(u => u.Nickname == request.Nickname))
+            if (await _context.Users.AnyAsync(u => u.Nickname == request.Nickname && u.Id != userId))
                 return BadRequest("Данный nickname уже используется.");
             
                 user.Nickname = request.Nickname;
