@@ -1,4 +1,6 @@
-﻿namespace ChessOnline.Server.Models
+﻿using ChessOnline.Shared.Enums;
+
+namespace ChessOnline.Server.Models
 {
     public class Friendship
     {

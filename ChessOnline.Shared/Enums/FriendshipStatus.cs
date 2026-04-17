@@ -1,4 +1,4 @@
-﻿namespace ChessOnline.Server.Models
+namespace ChessOnline.Shared.Enums
 {
     public enum FriendshipStatus
     {

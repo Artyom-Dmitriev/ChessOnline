@@ -1,4 +1,4 @@
-﻿namespace ChessOnline.Server.DTOs
+namespace ChessOnline.Shared.DTOs
 {
     public class LoginRequest
     {

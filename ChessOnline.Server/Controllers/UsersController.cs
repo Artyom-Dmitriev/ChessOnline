@@ -1,5 +1,5 @@
 ﻿using ChessOnline.Server.Data;
-using ChessOnline.Server.DTOs;
+using ChessOnline.Shared.DTOs;
 using ChessOnline.Server.Models;
 using ChessOnline.Server.Services;
 using Microsoft.AspNetCore.Mvc;
