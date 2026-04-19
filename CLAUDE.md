@@ -35,7 +35,25 @@ C# beginner, first web project. Knows C# basics only. Goal: learn web dev deeply
 - Reference PDF learning materials (Parts 1-4) when relevant concepts appear
 
 ## Current Stage
-Stage 1 - Foundation: Solution setup, DB models, registration, login, guest mode.
+Stage 2 - Chess Engine (ChessOnline.Engine).
+Working on pure chess logic as a standalone library.
+Stage 1 (Foundation) is complete: Solution structure,
+DB models, auth with JWT, guest mode, all tested
+via Swagger.
+
+Blocks:
+2.1 Basic types (enums, structs) - next
+2.2 Board representation (8x8 array)
+2.3 Move generation (all piece types)
+2.4 Special rules (castling, en passant, promotion)
+2.5 Check detection + move filtering
+2.6 Checkmate, stalemate, draw conditions
+2.7 GameState (full game management)
+2.8 Algebraic notation
+
+Key principle for this stage: Engine has ZERO
+dependencies on web/DB. Pure chess logic only.
+All public methods must have xUnit tests.
 
 ## Architecture Decisions
 - Server validates ALL moves (anti-cheat)
