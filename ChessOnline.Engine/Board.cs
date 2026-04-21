@@ -7,6 +7,12 @@ namespace ChessOnline.Engine
         private Piece[,] _board = new Piece[8, 8];
         public PieceColor CurrentTurn { get; private set; } = PieceColor.White;
 
+        private Board(Piece[,] board, PieceColor currentTurn)
+        {
+            _board = board;
+            CurrentTurn = currentTurn;
+        }
+
         public Piece GetPiece(Square square)
         {
             return _board[square.Row, square.Col];
@@ -122,6 +128,20 @@ namespace ChessOnline.Engine
                 }
             }
             throw new InvalidOperationException("Король не найден на доске.");
+        }
+
+        public Board Clone()
+        {
+            var cloneBoard = new Piece[8, 8];
+
+            for (int row = 0; row < 8; row++)
+            {
+                for (int col = 0; col < 8; col++)
+                {
+                    cloneBoard[row, col] = this._board[row, col];
+                }
+            }
+            return new Board(cloneBoard, this.CurrentTurn);
         }
     }
 }
