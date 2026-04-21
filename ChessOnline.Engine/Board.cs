@@ -7,7 +7,7 @@ namespace ChessOnline.Engine
         private Piece[,] _board = new Piece[8, 8];
         public PieceColor CurrentTurn { get; private set; } = PieceColor.White;
 
-        private Board(Piece[,] board, PieceColor currentTurn)
+        public Board(Piece[,] board, PieceColor currentTurn)
         {
             _board = board;
             CurrentTurn = currentTurn;
