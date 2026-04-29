@@ -38,6 +38,13 @@ namespace ChessOnline.Engine
             return false;
         }
 
+        public bool IsEmptyOrEnemy(Square sq, PieceColor myColor)
+        {
+            var piece = GetPiece(sq);
+
+            return piece.IsEmpty || piece.Color != myColor;
+        }
+
         public void SetupInitialPosition()
         {
             // Setup Pawns for white
