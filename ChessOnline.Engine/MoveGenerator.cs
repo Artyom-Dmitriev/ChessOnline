@@ -9,6 +9,23 @@ namespace ChessOnline.Engine
           (+2, +1), (+2, -1), (-2, +1), (-2, -1),
           (+1, +2), (+1, -2), (-1, +2), (-1, -2)
         };
+
+        private static readonly (int dRow, int dCol)[] RookDirections =
+        {
+          (+1, 0), (-1, 0), (0, +1), (0, -1)
+        };
+
+        private static readonly (int dRow, int dCol)[] BishopDirections =
+        {
+          (+1, +1), (+1, -1), (-1, +1), (-1, -1)
+        };
+
+        private static readonly (int dRow, int dCol)[] QueenDirections =
+        {
+          (+1, 0), (-1, 0), (0, +1), (0, -1),
+          (+1, +1), (+1, -1), (-1, +1), (-1, -1)
+        };
+
         public List<Move> GetMoves(Board board, Square from)
         {
             var piece = board.GetPiece(from);
@@ -20,6 +37,9 @@ namespace ChessOnline.Engine
             {
                 PieceType.Pawn => GetPawnMoves(board, from, piece.Color),
                 PieceType.Knight => GetKnightMoves(board, from, piece.Color),
+                PieceType.Bishop => GetBishopMoves(board, from, piece.Color),
+                PieceType.Rook => GetRookMoves(board, from, piece.Color),
+                PieceType.Queen => GetQueenMoves(board, from, piece.Color),
                 _ => new List<Move>()
             };
         }
@@ -28,6 +48,43 @@ namespace ChessOnline.Engine
         {
             return row >= 0 && col >= 0 && row < 8 && col < 8;
         }
+
+        private List<Move> GetSlidingMoves(Board board, Square from, PieceColor color, (int dRow, int dCol)[] directions)
+        {
+            var moves = new List<Move>();
+
+            foreach (var (dRow, dCol) in directions)
+            {
+                for (int step = 1; step < 8; step++)
+                {
+                    var to = new Square
+                    {
+                        Row = from.Row + dRow * step,
+                        Col = from.Col + dCol * step
+                    };
+
+                    if (!IsOnBoard(to.Row, to.Col)) break;
+                    if (!board.IsEmptyOrEnemy(to, color)) break;
+
+                    moves.Add(new Move { From = from, To = to });
+
+                    if (!board.IsEmpty(to)) break;
+                }
+            }
+
+
+            return moves;
+        }
+
+
+        public List<Move> GetRookMoves(Board board, Square from, PieceColor color)
+            => GetSlidingMoves(board, from, color, RookDirections);
+
+        public List<Move> GetBishopMoves(Board board, Square from, PieceColor color)
+            => GetSlidingMoves(board, from, color, BishopDirections);
+
+        public List<Move> GetQueenMoves(Board board, Square from, PieceColor color)
+            => GetSlidingMoves(board, from, color, QueenDirections);
 
         public List<Move> GetKnightMoves(Board board, Square from, PieceColor color)
         {

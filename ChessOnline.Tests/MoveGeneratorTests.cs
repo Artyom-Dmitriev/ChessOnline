@@ -338,10 +338,140 @@ namespace ChessOnline.Tests
             var from = new Square { Row = 4, Col = 4 };
             board.SetPiece(from, new Piece { Color = PieceColor.Black, Type = PieceType.Knight }); // Place the Knight on the board
             board.SetPiece(new Square { Row = 6, Col = 5 }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place an enemy piece on one of the Knight's possible move squares
+            
             // Act
             var moves = moveGenerator.GetMoves(board, from);
+           
             // Assert
             Assert.Contains(moves, m => m.To.Row == 6 && m.To.Col == 5); // The Knight should be able to take an enemy piece
+        }
+
+        /// <summary>
+        /// Rook Tests.
+        /// </summary>
+
+        [Fact]
+        public void Generate_Rook_Moves_From_Center()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Rook }); // Place the Rook on the board
+
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+
+            // Assert
+            Assert.Equal(14, moves.Count); // A rook in the center of the board should have 14 possible moves (7 in each direction)
+        }
+
+        [Fact]
+        public void Rook_In_The_Corner_Should_Have_15_Moves()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 0, Col = 0 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Rook }); // Place the Rook in the corner
+           
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            
+            // Assert
+            Assert.Equal(14, moves.Count); // A rook in the corner should have 14 possible moves (7 along the row and 7 along the column)
+        }
+
+        [Fact]
+        public void Rook_Blocked_By_Own_Piece_Should_Have_Limited_Moves()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Rook }); // Place the Rook on the board
+            board.SetPiece(new Square { Row = 4, Col = 7 }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place a piece blocking the rook's movement to the right
+            
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            
+            // Assert
+            Assert.DoesNotContain(moves, m => m.To.Row == 4 && m.To.Col == 7); // The rook should not be able to move to a square occupied by its own piece
+            Assert.DoesNotContain(moves, m => m.To.Row == 4 && m.To.Col == 8); // The rook should not be able to move past its own piece
+            Assert.Equal(13, moves.Count); // The rook should have 13 possible moves instead of 14
+        }
+
+        [Fact]
+        public void Rook_Can_Take_Enemy_Piece_And_Stop()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Rook }); // Place the Rook on the board
+            board.SetPiece(new Square { Row = 4, Col = 6 }, new Piece { Color = PieceColor.Black, Type = PieceType.Pawn }); // Place an enemy piece blocking the rook's movement to the right
+            
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            
+            // Assert
+            Assert.Contains(moves, m => m.To.Row == 4 && m.To.Col == 6); // The rook should be able to take an enemy piece
+            Assert.DoesNotContain(moves, m => m.To.Row == 4 && m.To.Col == 7); // The rook should not be able to move past the enemy piece
+        }
+
+        [Fact]
+        public void Rook_Can_Not_Move_Diagonally()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Rook }); // Place the Rook on the board
+            
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            
+            // Assert
+            Assert.DoesNotContain(moves, m => m.To.Row == 5 && m.To.Col == 5); // The rook should not be able to move diagonally
+            Assert.DoesNotContain(moves, m => m.To.Row == 3 && m.To.Col == 3); // The rook should not be able to move diagonally
+        }
+
+        [Fact]
+        public void Blocked_Rook_Should_Not_Have_Moves_In_That_Direction()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Rook }); // Place the Rook on the board
+            board.SetPiece(new Square { Row = 2, Col = 4 }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place a piece blocking the rook's movement upwards
+            
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            
+            // Assert
+            Assert.DoesNotContain(moves, m => m.To.Row == 2 && m.To.Col == 4); // The rook should not be able to move to a square occupied by its own piece
+            Assert.DoesNotContain(moves, m => m.To.Row == 1 && m.To.Col == 4); // The rook should not be able to move past its own piece
+        }
+
+        [Fact]
+        public void Rook_Can_Not_Moving_Beeing_Blocked_By_Own_Piece()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Rook }); // Place the Rook on the board
+            board.SetPiece(new Square { Row = 4, Col = 5 }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place a piece blocking the rook's movement to the right
+            board.SetPiece(new Square { Row = 5, Col = 4 }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place a piece blocking the rook's movement downwards
+            board.SetPiece(new Square { Row = 4, Col = 3 }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place a piece blocking the rook's movement to the left
+            board.SetPiece(new Square { Row = 3, Col = 4 }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place a piece blocking the rook's movement upwards
+            
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+
+            // Assert
+            Assert.Equal(0, moves?.Count); // The rook should not have any moves if it is completely blocked by its own pieces
         }
     }
 }
