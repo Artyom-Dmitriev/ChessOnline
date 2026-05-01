@@ -728,5 +728,147 @@ namespace ChessOnline.Tests
             // Assert
             Assert.Equal(8, allMoves.Count); // The white king should have 8 possible moves (one square in any direction) when the black king is far away
         }
+
+        /// <summary>
+        /// Promotion Tests For White Pawns.
+        /// </summary>
+
+        [Fact]
+        public void Generate_Promotion_For_Black_Pawn()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 6, Col = 3 };
+            var to = new Square { Row = 7, Col = 3 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place the white pawn on the board
+
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+
+            // Assert
+            Assert.Contains(moves, m => m.To.Row == 7 && m.To.Col == 3 && m.Promotion == PieceType.Queen); // Promotion to Queen
+            Assert.Contains(moves, m => m.To.Row == 7 && m.To.Col == 3 && m.Promotion == PieceType.Rook); // Promotion to Rook
+            Assert.Contains(moves, m => m.To.Row == 7 && m.To.Col == 3 && m.Promotion == PieceType.Bishop); // Promotion to Bishop
+            Assert.Contains(moves, m => m.To.Row == 7 && m.To.Col == 3 && m.Promotion == PieceType.Knight); // Promotion to Knight
+        }
+
+        [Fact]
+        public void No_Moves_For_White_Pawn_Without_Promotion()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 6, Col = 3 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place the white pawn on the board
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            // Assert
+            Assert.DoesNotContain(moves, m => m.To.Row == 7 && m.To.Col == 3 && m.Promotion == null); // There should be no move to (7, 3) without promotion
+        }
+
+        [Fact]
+        public void Generate_Promotion_For_White_Pawn_Taking_Diagonal()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 6, Col = 3 };
+            var target = new Square { Row = 7, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place the white pawn on the board
+            board.SetPiece(target, new Piece { Color = PieceColor.Black, Type = PieceType.Pawn }); // Place a black piece diagonally in front of the white pawn
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            // Assert
+            Assert.Contains(moves, m => m.To.Row == 7 && m.To.Col == 4 && m.Promotion == PieceType.Queen); // Promotion to Queen
+            Assert.Contains(moves, m => m.To.Row == 7 && m.To.Col == 4 && m.Promotion == PieceType.Rook); // Promotion to Rook
+            Assert.Contains(moves, m => m.To.Row == 7 && m.To.Col == 4 && m.Promotion == PieceType.Bishop); // Promotion to Bishop
+            Assert.Contains(moves, m => m.To.Row == 7 && m.To.Col == 4 && m.Promotion == PieceType.Knight); // Promotion to Knight
+        }
+
+        [Fact]
+        public void No_Promotion_Moves_For_White_Pawn_In_Middle_Of_Board()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 3, Col = 3 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place the white pawn on the board
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            // Assert
+            Assert.DoesNotContain(moves, m => m.Promotion != null && m.To.Row == 4 && m.To.Col == 3); // There should be no promotion moves for a pawn that is not on the last rank
+        }
+
+        /// <summary>
+        /// Promotion Tests For Black Pawns.
+        /// </summary>
+
+        [Fact]
+        public void Generate_Promotion_Moves_For_Black_Pawn()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.Black);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 1, Col = 3 };
+            var to = new Square { Row = 0, Col = 3 };
+            board.SetPiece(from, new Piece { Color = PieceColor.Black, Type = PieceType.Pawn }); // Place the black pawn on the board
+
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+
+            // Assert
+            Assert.Contains(moves, m => m.To.Row == 0 && m.To.Col == 3 && m.Promotion == PieceType.Queen); // Promotion to Queen
+            Assert.Contains(moves, m => m.To.Row == 0 && m.To.Col == 3 && m.Promotion == PieceType.Rook); // Promotion to Rook
+            Assert.Contains(moves, m => m.To.Row == 0 && m.To.Col == 3 && m.Promotion == PieceType.Bishop); // Promotion to Bishop
+            Assert.Contains(moves, m => m.To.Row == 0 && m.To.Col == 3 && m.Promotion == PieceType.Knight); // Promotion to Knight
+        }
+
+        [Fact]
+        public void Promotion_For_Black_Pawn_Taking_Diagonal()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.Black);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 1, Col = 3 };
+            var target = new Square { Row = 0, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.Black, Type = PieceType.Pawn }); // Place the black pawn on the board
+            board.SetPiece(target, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place a white piece diagonally in front of the black pawn
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            // Assert
+            Assert.Contains(moves, m => m.To.Row == 0 && m.To.Col == 4 && m.Promotion == PieceType.Queen); // Promotion to Queen
+            Assert.Contains(moves, m => m.To.Row == 0 && m.To.Col == 4 && m.Promotion == PieceType.Rook); // Promotion to Rook
+            Assert.Contains(moves, m => m.To.Row == 0 && m.To.Col == 4 && m.Promotion == PieceType.Bishop); // Promotion to Bishop
+            Assert.Contains(moves, m => m.To.Row == 0 && m.To.Col == 4 && m.Promotion == PieceType.Knight); // Promotion to Knight
+        }
+
+        [Fact]
+        public void No_Promotion_Moves_For_Black_Pawn_In_Middle_Of_Board()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.Black);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.Black, Type = PieceType.Pawn }); // Place the black pawn on the board
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            // Assert
+            Assert.DoesNotContain(moves, m => m.Promotion != null && m.To.Row == 3 && m.To.Col == 4); // There should be no promotion moves for a pawn that is not on the last rank
+        }
+
+        [Fact]
+        public void No_Promotion_Moves_For_Black_Pawn_Without_Promotion()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.Black);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 1, Col = 3 };
+            board.SetPiece(from, new Piece { Color = PieceColor.Black, Type = PieceType.Pawn }); // Place the black pawn on the board
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            // Assert
+            Assert.DoesNotContain(moves, m => m.To.Row == 0 && m.To.Col == 3 && m.Promotion == null); // There should be no move to (0, 3) without promotion
+        }
     }
 }

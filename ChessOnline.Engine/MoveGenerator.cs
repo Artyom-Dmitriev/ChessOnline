@@ -32,6 +32,28 @@ namespace ChessOnline.Engine
           (+1, +1), (+1, -1), (-1, +1), (-1, -1)
         };
 
+        private static readonly PieceType[] PromotionTypes =
+        {
+          PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight
+        };
+
+        private void AddPawnMove(List<Move> moves, Square from, Square to, PieceColor color)
+        {
+            bool isPromotion =
+                (color == PieceColor.White && to.Row == 7) ||
+                (color == PieceColor.Black && to.Row == 0);
+
+            if (isPromotion)
+            {
+                foreach (var promo in PromotionTypes)
+                    moves.Add(new Move { From = from, To = to, Promotion = promo });
+            }
+            else
+            {
+                moves.Add(new Move { From = from, To = to });
+            }
+        }
+
         public List<Move> GetMoves(Board board, Square from)
         {
             var piece = board.GetPiece(from);
@@ -153,42 +175,23 @@ namespace ChessOnline.Engine
             {
                 if (IsOnBoard(from.Row + 1, from.Col) &&
                     board.IsEmpty(new Square { Col = from.Col, Row = from.Row + 1 }))
-                    moves.Add(new Move
-                    {
-                        From = from,
-                        To = new Square { Col = from.Col, Row = from.Row + 1 }
-                    });
+                    AddPawnMove(moves, from, new Square { Col = from.Col, Row = from.Row + 1 }, color);
 
                 if (from.Row == 1 &&
                     board.IsEmpty(new Square { Col = from.Col, Row = from.Row + 2 }) &&
                     board.IsEmpty(new Square { Col = from.Col, Row = from.Row + 1 }))
-                    moves.Add(new Move
-                    {
-                        From = from,
-                        To = new Square { Col = from.Col, Row = from.Row + 2 }
-                    });
+                    AddPawnMove(moves, from, new Square { Col = from.Col, Row = from.Row + 2 }, color);
 
                 if (IsOnBoard(from.Row + 1, from.Col + 1) &&
                     board.IsOccupiedByColor(new Square
-                    { Col = from.Col + 1, Row = from.Row + 1 }, PieceColor.Black))
-                {
-                    moves.Add(new Move
-                    {
-                        From = from,
-                        To = new Square { Col = from.Col + 1, Row = from.Row + 1 }
-                    });
-                }
+                    { Col = from.Col + 1, Row = from.Row + 1 }, PieceColor.Black))               
+                    AddPawnMove(moves, from, new Square { Col = from.Col + 1, Row = from.Row + 1 }, color);
+                
 
                 if (IsOnBoard(from.Row + 1, from.Col - 1) &&
                     board.IsOccupiedByColor(new Square
-                    { Col = from.Col - 1, Row = from.Row + 1 }, PieceColor.Black))
-                {
-                    moves.Add(new Move
-                    {
-                        From = from,
-                        To = new Square { Col = from.Col - 1, Row = from.Row + 1 }
-                    });
-                }
+                    { Col = from.Col - 1, Row = from.Row + 1 }, PieceColor.Black))              
+                    AddPawnMove(moves, from, new Square { Col = from.Col - 1, Row = from.Row + 1 }, color);
             }
 
             //Black Pawns moves
@@ -197,43 +200,23 @@ namespace ChessOnline.Engine
             {
                 if (IsOnBoard(from.Row - 1, from.Col) &&
                     board.IsEmpty(new Square { Col = from.Col, Row = from.Row - 1 }))
-                    moves.Add(new Move
-                    {
-                        From = from,
-                        To = new Square { Col = from.Col, Row = from.Row - 1 }
-                    });
-
+                    AddPawnMove(moves, from, new Square { Col = from.Col, Row = from.Row - 1 }, color);
 
                 if (from.Row == 6 &&
                    board.IsEmpty(new Square { Col = from.Col, Row = from.Row - 2 }) &&
                    board.IsEmpty(new Square { Col = from.Col, Row = from.Row - 1 }))
-                    moves.Add(new Move
-                    {
-                        From = from,
-                        To = new Square { Col = from.Col, Row = from.Row - 2 }
-                    });
+                    AddPawnMove(moves, from, new Square { Col = from.Col, Row = from.Row - 2 }, color); 
 
                 if (IsOnBoard(from.Row - 1, from.Col - 1) &&
                     board.IsOccupiedByColor(new Square
-                    { Col = from.Col - 1, Row = from.Row - 1 }, PieceColor.White))
-                {
-                    moves.Add(new Move
-                    {
-                        From = from,
-                        To = new Square { Col = from.Col - 1, Row = from.Row - 1 }
-                    });
-                }
+                    { Col = from.Col - 1, Row = from.Row - 1 }, PieceColor.White))             
+                    AddPawnMove(moves, from, new Square { Col = from.Col - 1, Row = from.Row - 1 }, color); 
+          
 
                 if (IsOnBoard(from.Row - 1, from.Col + 1) &&
                         board.IsOccupiedByColor(new Square
                         { Col = from.Col + 1, Row = from.Row - 1 }, PieceColor.White))
-                {
-                    moves.Add(new Move
-                    {
-                        From = from,
-                        To = new Square { Col = from.Col + 1, Row = from.Row - 1 }
-                    });
-                }
+                    AddPawnMove(moves, from, new Square { Col = from.Col + 1, Row = from.Row - 1 }, color);
             }
 
             return moves;
