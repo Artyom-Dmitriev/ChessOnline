@@ -16,7 +16,7 @@ namespace ChessOnline.Tests
             var board = new Board(new Piece[8, 8], PieceColor.White);
             var moveGenerator = new MoveGenerator();
             var from = new Square { Row = 3, Col = 3 };
-            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place the white pawn on the boardcl
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place the white pawn on the board
 
             // Act
             var moves = moveGenerator.GetMoves(board, from);
@@ -455,7 +455,7 @@ namespace ChessOnline.Tests
         }
 
         [Fact]
-        public void Rook_Can_Not_Moving_Beeing_Blocked_By_Own_Piece()
+        public void Rook_Can_Not_Move_Being_Blocked_By_Own_Piece()
         {
             // Arrange
             var board = new Board(new Piece[8, 8], PieceColor.White);
@@ -471,7 +471,7 @@ namespace ChessOnline.Tests
             var moves = moveGenerator.GetMoves(board, from);
 
             // Assert
-            Assert.Equal(0, moves?.Count); // The rook should not have any moves if it is completely blocked by its own pieces
+            Assert.Empty(moves); // The rook should not have any moves if it is completely blocked by its own pieces
         }
 
         /// <summary>
@@ -615,6 +615,118 @@ namespace ChessOnline.Tests
             var moves = moveGenerator.GetMoves(board, from);
             // Assert
             Assert.Empty(moves); // The queen should have no available moves when blocked by its own pieces
+        }
+
+        /// <summary>
+        /// King Tests.
+        /// </summary>
+
+        [Fact]
+        public void King_In_Center_Should_Have_8_Moves()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.King }); // Place the King on the board
+
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+
+            // Assert
+            Assert.Equal(8, moves.Count); // A king in the center of the board should have 8 possible moves (one square in any direction)
+        }
+
+        [Fact]
+        public void King_In_The_Corner_Should_Have_3_Moves()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 0, Col = 0 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.King }); // Place the King in the corner
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            // Assert
+            Assert.Equal(3, moves.Count); // A king in the corner should have 3 possible moves (one square in any direction within the board limits)
+        }
+
+        [Fact]
+        public void King_Can_Not_Move_Into_Square_Occupied_By_Own_Piece()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.King }); // Place the King on the board
+            board.SetPiece(new Square { Row = 5, Col = 5 }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place a piece blocking the king's movement diagonally down-right
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+            // Assert
+            Assert.DoesNotContain(moves, m => m.To.Row == 5 && m.To.Col == 5); // The king should not be able to move to a square occupied by its own piece
+        }
+
+        [Fact]
+        public void King_Can_Take_Enemy_Piece()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var from = new Square { Row = 4, Col = 4 };
+            board.SetPiece(from, new Piece { Color = PieceColor.White, Type = PieceType.King }); // Place the King on the board
+            board.SetPiece(new Square { Row = 5, Col = 5 }, new Piece { Color = PieceColor.Black, Type = PieceType.Pawn }); // Place an enemy piece blocking the king's movement diagonally down-right
+
+            // Act
+            var moves = moveGenerator.GetMoves(board, from);
+
+            // Assert
+            Assert.Contains(moves, m => m.To.Row == 5 && m.To.Col == 5); // The king should be able to take an enemy piece
+        }
+
+        /// <summary>
+        /// GetAllMoves() Tests.
+        /// </summary>
+
+        [Fact]
+        public void Generate_All_Moves_For_White_In_Starting_Position()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+
+            for (var i = 0; i < 8; i++)
+            {
+                board.SetPiece(new Square { Row = 1, Col = i }, new Piece { Color = PieceColor.White, Type = PieceType.Pawn }); // Place white pawns on the second row
+            }
+
+            board.SetPiece(new Square { Row = 0, Col = 1 }, new Piece { Color = PieceColor.White, Type = PieceType.Knight }); // Place white knight on the first row
+            board.SetPiece(new Square { Row = 0, Col = 6 }, new Piece { Color = PieceColor.White, Type = PieceType.Knight }); // Place white knight on the first row
+
+            // Act
+            var allMoves = moveGenerator.GetAllMoves(board, PieceColor.White);
+
+            // Assert
+            Assert.Equal(20, allMoves.Count); // In the starting position, white should have 20 possible moves (16 pawn moves and 4 knight moves)
+            Assert.Contains(allMoves, m => m.To.Row == 2 && m.To.Col == 0); // Example assertion for a Pawn move
+            Assert.Contains(allMoves, m => m.To.Row == 2 && m.To.Col == 0); // Example assertion for a Knight move
+        }
+
+        [Fact]
+        public void Generate_All_Moves_For_White_King_Staying_At_One_Board_With_Black_King()
+        {
+            // Arrange
+            var board = new Board(new Piece[8, 8], PieceColor.White);
+            var moveGenerator = new MoveGenerator();
+            var fromForWhiteKing = new Square { Row = 4, Col = 4 };
+            var fromForBlackKing = new Square { Row = 0, Col = 0 };
+            board.SetPiece(fromForWhiteKing, new Piece { Color = PieceColor.White, Type = PieceType.King }); // Place the white King on the board
+            board.SetPiece(fromForBlackKing, new Piece { Color = PieceColor.Black, Type = PieceType.King }); // Place the black King on the board
+
+            // Act
+            var allMoves = moveGenerator.GetAllMoves(board, PieceColor.White);
+
+            // Assert
+            Assert.Equal(8, allMoves.Count); // The white king should have 8 possible moves (one square in any direction) when the black king is far away
         }
     }
 }

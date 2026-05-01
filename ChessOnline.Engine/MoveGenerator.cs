@@ -26,6 +26,12 @@ namespace ChessOnline.Engine
           (+1, +1), (+1, -1), (-1, +1), (-1, -1)
         };
 
+        private static readonly (int dRow, int dCol)[] KingOffsets =
+        {
+          (+1, 0), (-1, 0), (0, +1), (0, -1),
+          (+1, +1), (+1, -1), (-1, +1), (-1, -1)
+        };
+
         public List<Move> GetMoves(Board board, Square from)
         {
             var piece = board.GetPiece(from);
@@ -40,8 +46,30 @@ namespace ChessOnline.Engine
                 PieceType.Bishop => GetBishopMoves(board, from, piece.Color),
                 PieceType.Rook => GetRookMoves(board, from, piece.Color),
                 PieceType.Queen => GetQueenMoves(board, from, piece.Color),
+                PieceType.King => GetKingMoves(board, from, piece.Color),
                 _ => new List<Move>()
             };
+        }
+
+        public List<Move> GetAllMoves(Board board, PieceColor color)
+        {
+            var allMoves = new List<Move>();
+
+            for (var row = 0; row < 8; row++)
+            {
+                for (var col = 0; col < 8; col++)
+                {
+                    var from = new Square { Row = row, Col = col };
+                    var piece = board.GetPiece(from);
+
+                    if (piece.IsEmpty) continue; // None piece on this square
+                    if (piece.Color != color) continue; // Opponent's piece, skip
+
+                    allMoves.AddRange(GetMoves(board, from)); // Get moves for this piece and add to the list
+                }
+            }
+
+            return allMoves;
         }
 
         public static bool IsOnBoard(int row, int col)
@@ -86,6 +114,20 @@ namespace ChessOnline.Engine
         public List<Move> GetQueenMoves(Board board, Square from, PieceColor color)
             => GetSlidingMoves(board, from, color, QueenDirections);
 
+        public List<Move> GetKingMoves(Board board, Square from, PieceColor color)
+        {
+            var moves = new List<Move>();
+
+            foreach (var move in KingOffsets)
+            {
+                var to = new Square { Row = from.Row + move.dRow, Col = from.Col + move.dCol };
+                if (!IsOnBoard(to.Row, to.Col)) continue;
+                if (!board.IsEmptyOrEnemy(to, color)) continue;
+                moves.Add(new Move { From = from, To = to });
+            }
+
+            return moves;
+        }
         public List<Move> GetKnightMoves(Board board, Square from, PieceColor color)
         {
             var moves = new List<Move>();
