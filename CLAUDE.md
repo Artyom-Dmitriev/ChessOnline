@@ -12,7 +12,7 @@ Blazor, SignalR and EF Core are all being learned here.
 Goal: learn web dev deeply, not just get working code.
 
 ## Tech Stack
-- ASP.NET Core 8 (Web API + SignalR)
+- ASP.NET Core (.NET 10) (Web API + SignalR)
 - Blazor WebAssembly (frontend)
 - Entity Framework Core + SQLite
 - xUnit for tests
